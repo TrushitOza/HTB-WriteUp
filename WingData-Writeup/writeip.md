@@ -48,7 +48,7 @@ nmap -sS -sV 10.129.244.106
 - On ftp.wingdata.htb, the application version is exposed as Wing FTP Server v7.4.3.
 
 ![Web redirect flow](web.png)
-![FTP subdomain page](ftp.web.png)
+![FTP subdomain page](version.png)
 
 ## 3. Vulnerability Identification
 
