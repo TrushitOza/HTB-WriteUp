@@ -142,14 +142,6 @@ cat ~/user.txt
 
 ![User flag retrieval](userflag.png)
 
-## Remediation Notes
-
-- Upgrade Wing FTP Server to a patched version that remediates CVE-2025-47812.
-- Restrict management and portal exposure to trusted networks.
-- Remove or harden command execution paths reachable from unauthenticated contexts.
-- Enforce strong credential storage and avoid recoverable secrets in local XML files.
-- Monitor for reverse shell patterns and suspicious outbound connections.
-
 ## Evidence Checklist
 
 - [x] Recon and service discovery
