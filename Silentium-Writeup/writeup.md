@@ -1,4 +1,4 @@
-# Silentium (HTB) - Production Writeup
+# Silentium (HTB) - Writeup
 
 Author: Trushit Oza
 Date: 2026-04-15
